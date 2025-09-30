@@ -2,57 +2,70 @@ const express = require("express");
 const router = express.Router();
 const Produto = require("../src/model/Produto");
 const DAO = require("../src/controller/ProdutoDAO");
-const path = require('path');
 
-router.get('/', function (req, res) {
-  res.sendFile(path.join(__dirname, "..")+'/index.html');
+router.get('/produto', async function (req, res) {
+    try {
+        const dao = new DAO();
+        await dao.listar();
+        res.json(dao.tabela.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 router.post('/produto', async function (req, res) {
-  const produto = new Produto();
-  const dao = new DAO();
-  const botao = req.body.b1;
-
-  var tabela;
-  var s = "";
-  try {
-    switch (botao.toLowerCase()) {
-      case 'gravar':
-        produto.descricao = req.body.txtDescricao;
-        produto.preco = req.body.txtPreco;
-        produto.qtde = req.body.txtQtde; 
+    try {
+        const produto = new Produto();
+        const dao = new DAO();
+        
+        produto.descricao = req.body.descricao;
+        produto.preco = req.body.preco;
+        produto.qtde = req.body.qtde;
 
         await dao.gravar(produto);
-        produto.codigo = dao.codigo;
-        res.render("mostrar", { codigo: produto.codigo, descricao: produto.descricao, preco: produto.preco, qtde: produto.qtde, msg: s });
-        break;
-      case 'alterar':
-        produto.codigo = req.body.txtCodigo;
-        produto.descricao = req.body.txtDescricao;
-        produto.preco = req.body.txtPreco;
-        produto.qtde = req.body.txtQtde; 
-        dao.alterar(produto);
-        res.render("mostrar", { codigo: produto.codigo, descricao: produto.descricao, preco: produto.preco, qtde: produto.qtde, msg: s });
-
-        break;
-      case 'remover':
-        produto.codigo = req.body.txtCodigo;
-        dao.remover(produto);
-        res.render("mostrar", { codigo: produto.codigo, descricao: produto.descricao, preco: produto.preco, qtde: produto.qtde, msg: s });
-        break;
-      case 'listar':
-        await dao.listar();
-        resp = dao.tabela;
-        res.render("mostrarTabela", { tabela: resp });
-
-        break;
+        res.json({ 
+            codigo: produto.codigo, 
+            descricao: produto.descricao, 
+            preco: produto.preco, 
+            qtde: produto.qtde 
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
     }
+});
 
-  }
-  catch (err) {
-    console.log(err);
-  }
+router.put('/produto/:codigo', async function (req, res) {
+    try {
+        const produto = new Produto();
+        const dao = new DAO();
+        
+        produto.codigo = req.params.codigo;
+        produto.descricao = req.body.descricao;
+        produto.preco = req.body.preco;
+        produto.qtde = req.body.qtde;
 
+        await dao.alterar(produto);
+        res.json({ message: "Produto alterado com sucesso" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
+});
+
+router.delete('/produto/:codigo', async function (req, res) {
+    try {
+        const produto = new Produto();
+        const dao = new DAO();
+        
+        produto.codigo = req.params.codigo;
+        await dao.remover(produto);
+        res.json({ message: "Produto removido com sucesso" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

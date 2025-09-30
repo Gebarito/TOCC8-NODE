@@ -7,19 +7,17 @@ class ProdutoDAO {
     async gravar(obj) {
         try {
             Banco.init();
-            await Banco.conexao.query('INSERT INTO produto(descricao,preco,qtde) VALUES($1,$2,$3) RETURNING *', [obj.descricao, obj.preco, obj.qtde])
-                .then(resposta => {
-                    this.codigo = resposta.rows[0].codigo;
-                    return (resposta.rows[0].codigo);
-                })
-                .catch(e => {
-                    console.error("Erro ao gravar: " + e.stack);
-                    return (0);
-                });
+            const resposta = await Banco.conexao.query(
+                'INSERT INTO produto(descricao,preco,qtde) VALUES($1,$2,$3) RETURNING *', 
+                [obj.descricao, obj.preco, obj.qtde]
+            );
+            this.codigo = resposta.rows[0].codigo;
             Banco.conexao.end();
+            return this.codigo;
         }
         catch (err) {
-            console.log(err);
+            console.error("Erro ao gravar: " + err);
+            throw err;
         }
     }
 
@@ -27,59 +25,43 @@ class ProdutoDAO {
         try {
             Banco.init();
             await Banco.conexao.query(
-                'Update produto set descricao=$1,preco=$2,qtde=$3 where codigo=$4',
-                [obj.descricao, obj.preco, obj.qtde, obj.codigo])
-                .then(_resposta => {
-                    console.error("Alterado com sucesso; ");
-                    return (1);
-                })
-                .catch(e => {
-                    console.error("Erro ao gravar: " + e.stack);
-                    return (0);
-                });
+                'UPDATE produto SET descricao=$1,preco=$2,qtde=$3 WHERE codigo=$4',
+                [obj.descricao, obj.preco, obj.qtde, obj.codigo]
+            );
             Banco.conexao.end();
+            return true;
         }
         catch (err) {
-            console.log(err);
+            console.error("Erro ao alterar: " + err);
+            throw err;
         }
-
     }
 
     async remover(obj) {
         try {
             Banco.init();
-            await Banco.conexao.query('Delete from produto where codigo = $1', [obj.codigo])
-                .then(resposta => {
-                    console.log("Removido com sucesso.");
-                    return (1);
-                })
-                .catch(e => {
-                    console.error("Erro ao Remover: " + e.stack);
-                    return (0);
-                });
+            await Banco.conexao.query('DELETE FROM produto WHERE codigo = $1', [obj.codigo]);
             Banco.conexao.end();
+            return true;
         }
         catch (err) {
-            console.log(err);
+            console.error("Erro ao remover: " + err);
+            throw err;
         }
-
     }
-    async listar(obj) {
+
+    async listar() {
         try {
             Banco.init();
-            await Banco.conexao.query('Select codigo,descricao,preco,qtde from produto')
-                .then(table => {
-                    this.tabela = table;
-                })
-                .catch(e => {
-                    return (null);
-                });
+            const resultado = await Banco.conexao.query('SELECT codigo,descricao,preco,qtde FROM produto');
+            this.tabela = resultado;
             Banco.conexao.end();
+            return resultado.rows;
         }
         catch (err) {
-            console.log(err);
+            console.error("Erro ao listar: " + err);
+            throw err;
         }
-
     }
 }
 

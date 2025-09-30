@@ -1,64 +1,82 @@
-const API_URL = "http://127.0.0.1:3000/produto";
+const API_URL = "http://localhost:3000/produto";
 
-async function carregarProdutos() {
-    const res = await fetch(API_URL);
-    const produtos = await res.json();
-    const lista = document.getElementById("lista");
-    lista.innerHTML = "";
-    produtos.forEach(p => {
-        const li = document.createElement("li");
-        li.textContent = `${p.codigo} - ${p.descricao} - R$${p.preco} - Qtd: ${p.qtde}`;
+async function listarProdutos() {
+    try {
+        const res = await fetch(API_URL);
+        const produtos = await res.json();
+        const lista = document.getElementById("lista");
+        lista.innerHTML = "";
 
-        const btnEditar = document.createElement("button");
-        btnEditar.textContent = "Editar";
-        btnEditar.onclick = () => editarProduto(p);
-
-        const btnExcluir = document.createElement("button");
-        btnExcluir.textContent = "Excluir";
-        btnExcluir.onclick = () => excluirProduto(p.codigo);
-
-        li.append(" ", btnEditar, " ", btnExcluir);
-        lista.appendChild(li);
-    });
+        produtos.forEach(p => {
+            const li = document.createElement("li");
+            li.innerHTML = `
+                <strong>${p.codigo}</strong> - ${p.descricao} 
+                - R$ ${p.preco} 
+                - Qtd: ${p.qtde}
+            `;
+            lista.appendChild(li);
+        });
+    } catch (err) {
+        console.error("Erro ao carregar produtos:", err);
+    }
 }
 
-async function salvarProduto(e) {
+async function gravarProduto(e) {
     e.preventDefault();
-    const codigo = document.getElementById("codigo").value;
+
     const produto = {
         descricao: document.getElementById("descricao").value,
         preco: parseFloat(document.getElementById("preco").value),
         qtde: parseInt(document.getElementById("qtde").value)
     };
 
-    if (codigo) {
-        await fetch(`${API_URL}/${codigo}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(produto)
-        });
-    } else {
+    try {
         await fetch(API_URL, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(produto)
         });
+
+    } catch (err) {
+        console.error("Erro ao salvar produto:", err);
     }
-    document.getElementById("formProduto").reset();
-    carregarProdutos();
 }
 
-async function excluirProduto(codigo) {
-    await fetch(`${API_URL}/${codigo}`, { method: "DELETE" });
-    carregarProdutos();
+async function deletarProduto(codigo) {
+    const produto = {
+        descricao: document.getElementById("descricao").value,
+        preco: parseFloat(document.getElementById("preco").value),
+        qtde: parseInt(document.getElementById("qtde").value)
+    };
+    try {
+        await fetch(`${API_URL}/${produto.qtde}`, {
+            method: "DELETE"
+        });
+        listarProdutos();
+    } catch (err) {
+        console.error("Erro ao excluir produto:", err);
+    }
+
 }
 
-function editarProduto(produto) {
-    document.getElementById("txtCodigo").value = produto.codigo;
-    document.getElementById("txtDescricao").value = produto.descricao;
-    document.getElementById("txtPreco").value = produto.preco;
-    document.getElementById("txtQtde").value = produto.qtde;
+async function alterarProduto() {
+    const produto = {
+        codigo: parseInt(document.getElementById("codigo").value),
+        descricao: document.getElementById("descricao").value,
+        preco: parseFloat(document.getElementById("preco").value),
+        qtde: parseInt(document.getElementById("qtde").value)
+    };
+    try {
+        await fetch(`${API_URL}/${produto.codigo}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(produto)
+        });
+    } catch (err) {
+        console.error("Erro ao alterar produto:", err);
+    }
 }
 
-document.getElementById("./cad").addEventListener("submit", salvarProduto);
-carregarProdutos();
+document.getElementById("formProduto").addEventListener("submit", gravarProduto);
+
+listarProdutos();

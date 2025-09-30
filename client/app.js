@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:3000/produtos";
+const API_URL = "http://127.0.0.1:3000/produto";
 
 async function carregarProdutos() {
     const res = await fetch(API_URL);
@@ -54,11 +54,11 @@ async function excluirProduto(codigo) {
 }
 
 function editarProduto(produto) {
-    document.getElementById("codigo").value = produto.codigo;
-    document.getElementById("descricao").value = produto.descricao;
-    document.getElementById("preco").value = produto.preco;
-    document.getElementById("qtde").value = produto.qtde;
+    document.getElementById("txtCodigo").value = produto.codigo;
+    document.getElementById("txtDescricao").value = produto.descricao;
+    document.getElementById("txtPreco").value = produto.preco;
+    document.getElementById("txtQtde").value = produto.qtde;
 }
 
-document.getElementById("formProduto").addEventListener("submit", salvarProduto);
+document.getElementById("./cad").addEventListener("submit", salvarProduto);
 carregarProdutos();

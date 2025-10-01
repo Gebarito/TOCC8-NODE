@@ -113,41 +113,6 @@ async function excluirProduto() {
     }
 }
 
-async function buscarProduto() {
-    const codigo = document.getElementById("codigo").value;
-
-    if (!codigo) {
-        alert("Informe o código do produto para buscar!");
-        return;
-    }
-
-    try {
-        const resposta = await fetch(API_URL);
-        const produtos = await resposta.json();
-        const produto = produtos.find(p => p.codigo == codigo);
-
-        if (produto) {
-            document.getElementById("descricao").value = produto.descricao;
-            document.getElementById("preco").value = produto.preco;
-            document.getElementById("qtde").value = produto.qtde;
-            alert("Produto carregado com sucesso!");
-        } else {
-            alert("Produto não encontrado!");
-            limparCampos();
-        }
-    } catch (err) {
-        console.error("Erro ao buscar produto:", err);
-        alert("Erro ao buscar produto: " + err.message);
-    }
-}
-
-function carregarParaEdicao(codigo, descricao, preco, qtde) {
-    document.getElementById("codigo").value = codigo;
-    document.getElementById("descricao").value = descricao;
-    document.getElementById("preco").value = preco;
-    document.getElementById("qtde").value = qtde;
-}
-
 function limparCampos() {
     document.getElementById("codigo").value = "";
     document.getElementById("descricao").value = "";

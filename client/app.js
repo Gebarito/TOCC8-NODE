@@ -26,7 +26,6 @@ async function salvarProduto() {
     const codigo = document.getElementById("codigo").value;
 
     if (codigo) {
-        alert("Para salvar um novo produto, o campo código deve estar vazio. Use o botão 'Novo' para limpar os campos.");
         return;
     }
 
